@@ -4,10 +4,10 @@ A skill for [OpenClaw](https://github.com/openclaw/openclaw) that allows you to 
 
 ## ✨ Features
 
-- **Interactive Menu**: Use `/switch-model` to get a list of available models as Telegram buttons.
-- **Direct Commands**: Switch models by name or alias (e.g., "switch to flash", "use pro").
-- **Fuzzy Search**: Supports searching for models by keywords.
-- **Session-Specific**: Changes only apply to the current session. Starting a new session (`/new`) resets to system defaults.
+- **Official Catalog Support**: Prioritizes models defined in `agents.defaults.models` following the OpenClaw standard.
+- **Interactive Menu**: Use `/switch-model` to get a list of available models as Telegram buttons, enriched with model descriptions.
+- **Smart Search**: Switch models using keywords, aliases, or tags (e.g., "switch to code model", "use flash").
+- **Metadata Aware**: Displays descriptions and tags to help you choose the right model.
 
 ## 🚀 Installation
 

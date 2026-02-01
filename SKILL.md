@@ -36,24 +36,20 @@ python3 skills/model-switch/scripts/list_models.py <keyword>
 ## ⚙️ 执行逻辑 (Agent SOP)
 
 ### 场景 1: 用户请求菜单 (`/switch-model`)
-1.  **调用脚本**: 运行 `python3 skills/model-switch/scripts/list_models.py` 获取 JSON 列表。
+1.  **调用脚本**: 运行 `python3 skills/model-switch/scripts/list_models.py`。
 2.  **构建菜单**:
-    *   **Telegram**: 使用 `message` 工具发送带 `buttons` 的消息。
-        *   按钮格式: `text="Alias/ID"`, `callback_data="/switch-model <Full_ID>"`。
-        *   记得加一个 "Reset Default" 按钮。
-    *   **其他平台**: 发送文本列表，让用户回复序号或 ID。
+    *   读取 JSON 列表。
+    *   **按钮文本优先顺序**: `alias` > `short_id`。
+    *   **描述辅助**: 如果有 `description`，在消息正文中列出，帮助用户分辨模型（如：哪个是预览版，哪个支持 Thinking）。
+    *   **发送菜单**: 使用 `message` 工具。
 
-### 场景 2: 用户执行切换 (`/switch-model <ID>` 或 点击按钮)
-1.  **解析 ID**: 获取用户提供的 `<Full_ID>` (例如 `google/gemini-3-flash-preview`)。
-2.  **执行切换**: 调用 `session_status(model="<Full_ID>")`。
-3.  **反馈**: 告知用户已切换，并显示当前模型信息。
-
-### 场景 3: 模糊搜索切换 ("切换到 claude")
-1.  **调用脚本查找**: 运行 `python3 skills/model-switch/scripts/list_models.py <keyword>`。
-2.  **处理输出**:
-    *   **单一结果**: 直接切换。
-    *   **多项结果**: 列出选项让用户选。
-    *   **无结果**: 报错。
+### 场景 2: 用户模糊请求 ("换成那个能写代码的模型")
+1.  **关键词提取**: 从用户话语中提取关键词（如 "code", "gpt", "claude"）。
+2.  **调用脚本查找**: 运行 `python3 skills/model-switch/scripts/list_models.py <keyword>`。
+3.  **智能决策**:
+    *   如果脚本返回单一 ID：直接调用 `session_status(model=ID)` 并反馈。
+    *   如果脚本返回 JSON 列表：发送一组按钮让用户确认。
+    *   如果找不到：礼貌告知。
 
 ## 💻 示例：发送 Telegram 菜单
 
