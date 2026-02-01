@@ -20,9 +20,9 @@ A skill for [OpenClaw](https://github.com/openclaw/openclaw) that allows you to 
 ## 🎮 Usage
 
 - `/switch-model`: Displays the interactive model selection menu.
-- `切换模型到 flash`: Switches to the model aliased as "flash".
-- `用 pro 模型`: Switches to the model aliased as "pro".
-- `重置模型`: Removes the session override and returns to the default model.
+- `Switch model to flash`: Switches to the model aliased as "flash".
+- `Use the pro model`: Switches to the model aliased as "pro".
+- `Reset model`: Removes the session override and returns to the default model.
 
 ## 🤖 Model Aliases
 
