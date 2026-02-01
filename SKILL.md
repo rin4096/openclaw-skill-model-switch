@@ -1,6 +1,11 @@
 ---
 name: model-switch
 description: 动态切换当前会话的模型 (Flash/Pro)，无需修改配置文件。支持交互式菜单。
+metadata:
+  openclaw:
+    commands:
+      - command: switch-model
+        description: 🎭 Open the model selection menu
 ---
 
 # Model Switcher 🎭
