@@ -15,48 +15,44 @@ def load_config():
 
 def find_models(config):
     models = []
-    
+    seen_ids = set()
+
     # 1. Check Standard 'models.providers'
     providers = config.get('models', {}).get('providers', {})
     for provider_name, provider_data in providers.items():
         for model in provider_data.get('models', []):
             model_id = model.get('id')
             full_id = f"{provider_name}/{model_id}"
-            
-            alias = ""
-            if "flash" in model_id.lower(): alias = "flash"
-            elif "pro" in model_id.lower(): alias = "pro"
-                
-            models.append({
-                "full_id": full_id,
-                "short_id": model_id,
-                "provider": provider_name,
-                "alias": alias
-            })
+            if full_id not in seen_ids:
+                models.append({
+                    "full_id": full_id,
+                    "short_id": model_id,
+                    "provider": provider_name,
+                    "alias": "" # Let users use IDs directly
+                })
+                seen_ids.add(full_id)
 
     # 2. Check 'agents.defaults.models' (Catalog)
     catalog = config.get('agents', {}).get('defaults', {}).get('models', {})
     for full_id, data in catalog.items():
-        # Avoid duplicates if already found
-        if any(m['full_id'] == full_id for m in models):
+        if full_id in seen_ids:
+            # Update alias if found in catalog
+            for m in models:
+                if m['full_id'] == full_id:
+                    m['alias'] = data.get('alias', "")
             continue
             
         parts = full_id.split('/')
         provider = parts[0] if len(parts) > 1 else "unknown"
         short_id = parts[1] if len(parts) > 1 else full_id
         
-        # Use configured alias, or guess
-        alias = data.get('alias', "")
-        if not alias:
-            if "flash" in short_id.lower(): alias = "flash"
-            elif "pro" in short_id.lower(): alias = "pro"
-
         models.append({
             "full_id": full_id,
             "short_id": short_id,
             "provider": provider,
-            "alias": alias
+            "alias": data.get('alias', "")
         })
+        seen_ids.add(full_id)
             
     return models
 
@@ -68,33 +64,26 @@ def main():
 
     if query:
         # Search mode
-        matches = []
+        results = []
         for m in models:
-            # Check for substring match in full_id (e.g. "claude" in "anthropic/claude-3-opus")
-            if query in m['full_id'].lower():
-                matches.append(m['full_id'])
-            # Check for provider match (e.g. "openai")
-            elif query in m['provider'].lower():
-                matches.append(m['full_id'])
-            # Check for alias match
-            elif m['alias'] == query:
-                 matches.append(m['full_id'])
+            # Match against everything!
+            if (query in m['full_id'].lower() or 
+                query in m['provider'].lower() or 
+                (m['alias'] and query in m['alias'].lower())):
+                results.append(m)
 
-        # Deduplicate matches
-        matches = sorted(list(set(matches)))
-
-        if len(matches) == 1:
-            print(matches[0])
-        elif len(matches) > 1:
-            # If exact match exists in the list, prefer it
-            for match in matches:
-                if match.lower() == query or match.split('/')[-1].lower() == query:
-                    print(match)
+        if len(results) == 1:
+            # Single perfect match
+            print(results[0]['full_id'])
+        elif len(results) > 1:
+            # Try to find an exact match for ID or Alias to break the tie
+            for r in results:
+                if r['short_id'].lower() == query or (r['alias'] and r['alias'].lower() == query):
+                    print(r['full_id'])
                     return
-            # Otherwise return all matches for the Agent to decide
-            print("MULTIPLE_MATCHES:")
-            for match in matches:
-                print(match)
+            
+            # Still multiple? Return as JSON list for the Agent
+            print(json.dumps(results))
         else:
             print(f"Error: No model found matching '{query}'")
             sys.exit(1)
