@@ -1,39 +1,78 @@
-# OpenClaw Skill: Model Switcher 🎭
+# OpenClaw Skill: Model Switcher 🔄
 
-A skill for [OpenClaw](https://github.com/openclaw/openclaw) that allows you to dynamically switch the AI model for the current session without modifying `openclaw.json`.
+A skill for [OpenClaw](https://github.com/openclaw/openclaw) that lets you switch AI models for the current session via a simple text menu.
 
 ## ✨ Features
 
-- **Official Catalog Support**: Prioritizes models defined in `agents.defaults.models` following the OpenClaw standard.
-- **Interactive Menu**: Use `/switch-model` to get a list of available models as Telegram buttons, enriched with model descriptions.
-- **Smart Search**: Switch models using keywords, aliases, or tags (e.g., "switch to code model", "use flash").
-- **Metadata Aware**: Displays descriptions and tags to help you choose the right model.
+- **Text-based menu** — clean numbered list, no inline buttons
+- **Alias support** — switch by number, name, or alias (e.g. `gemini`, `opus`)
+- **Lightweight** — pure bash + jq, no Python dependency
+- **Reset** — option 0 to return to the default model
+
+## 📦 Requirements
+
+- [OpenClaw](https://github.com/openclaw/openclaw)
+- `jq` (usually pre-installed on macOS; `apt install jq` on Linux)
 
 ## 🚀 Installation
 
-1. Clone this repository into your OpenClaw workspace's `skills` folder:
-   ```bash
-   git clone https://github.com/rin4096/openclaw-skill-model-switch.git skills/model-switch
-   ```
-2. OpenClaw will automatically detect the skill.
+Clone into your OpenClaw workspace's `skills` folder:
+
+```bash
+git clone https://github.com/rin4096/openclaw-skill-model-switch.git skills/model-switcher
+```
+
+OpenClaw will automatically detect the skill.
 
 ## 🎮 Usage
 
-- `/switch-model`: Displays the interactive model selection menu.
-- `Switch model to flash`: Switches to the model aliased as "flash".
-- `Use the pro model`: Switches to the model aliased as "pro".
-- `Reset model`: Removes the session override and returns to the default model.
+Say any of:
+- "切換模型" / "switch model" / "list models"
+- "use gemini" / "用 flash"
 
-## 🤖 Model Aliases
+The agent will display a numbered menu. Reply with a number to switch.
 
-By default, the skill recognizes:
-- `flash` -> `google/gemini-3-flash-preview`
-- `pro` -> `google/gemini-3-pro-preview`
-- `default` -> Resets to system default
+### Example Output
 
-## 🛠 Technical Details
+```
+🔄 模型切換選單
 
-The skill uses OpenClaw's `session_status(model="...")` tool to perform the override. It dynamically reads the available models from your `openclaw.json` using the included `list_models.py` script.
+✨ 共有 5 個可用模型：
+
+1️⃣  anthropic/claude-opus-4-6
+    別名: opus (默認) ✨
+
+2️⃣  google/gemini-3-flash-preview
+    別名: gemini-flash
+
+3️⃣  google/gemini-3-pro-preview
+    別名: gemini
+
+...
+
+──────────────
+
+0️⃣  重置為默認模型
+
+💡 回覆編號（0-5）即可切換
+```
+
+## 🛠 How It Works
+
+1. Script reads `openclaw config get agents.defaults` to get the model list
+2. Formats a numbered text menu with aliases and default marker
+3. Agent captures user's reply and calls `session_status(model=...)` to switch
+
+## 📁 Structure
+
+```
+skills/model-switcher/
+├── README.md
+├── SKILL.md
+└── scripts/
+    └── model-switcher.sh
+```
 
 ---
-Created with love by [Akiyama Mizuki](https://github.com/openclaw/openclaw) for Ena. 🎀
+
+Created with 💕 by [Akiyama Mizuki](https://github.com/rin4096) 🎀
